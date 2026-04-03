@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { X, Clock, Fish, FileText, CheckCircle, Circle, Trash2 } from 'lucide-react';
+import { X, Clock, Fish, FileText, CheckCircle, Circle, Trash2, Edit } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { Trip } from '../types';
 import { formatDate } from '../lib/utils';
 import { cn } from '../lib/utils';
+import { EditTripModal } from './EditTripModal';
 
 interface Props {
   trip: Trip;
@@ -23,6 +24,7 @@ export function TripDetailModal({ trip, onClose }: Props) {
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   // Treat any trip in the past as completed regardless of stored status
   const isPast = trip.date < new Date().toISOString().split('T')[0];
@@ -39,6 +41,8 @@ export function TripDetailModal({ trip, onClose }: Props) {
     onClose();
   };
 
+  if (showEdit) return <EditTripModal trip={trip} onClose={() => { setShowEdit(false); onClose(); }} />;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -47,7 +51,10 @@ export function TripDetailModal({ trip, onClose }: Props) {
             <h2 className="text-base font-semibold text-slate-800">{formatDate(trip.date)}</h2>
             <p className="text-xs text-slate-400">{trip.location}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><X size={18} /></button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowEdit(true)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Edit size={16} /></button>
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><X size={18} /></button>
+          </div>
         </div>
 
         <div className="p-5 space-y-4">

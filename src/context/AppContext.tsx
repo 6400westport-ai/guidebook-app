@@ -22,6 +22,7 @@ interface AppContextType {
   updatePhotoUrl: (field: 'photoUrl' | 'logoUrl', url: string) => Promise<void>;
   deleteTrip: (id: string) => Promise<void>;
   deleteClient: (id: string) => Promise<void>;
+  updateTripFull: (id: string, updates: { date: string; duration: string; tripType: string; location: string; notes: string; clients: TripClient[] }) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -200,6 +201,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await loadData();
   };
 
+  const updateTripFull = async (id: string, updates: { date: string; duration: string; tripType: string; location: string; notes: string; clients: TripClient[] }) => {
+    await supabase.from('trips').update({
+      date: updates.date,
+      duration: updates.duration,
+      trip_type: updates.tripType,
+      location: updates.location,
+      notes: updates.notes,
+    }).eq('id', id);
+    // Replace all clients for this trip
+    await supabase.from('trip_clients').delete().eq('trip_id', id);
+    if (updates.clients.length > 0) {
+      await supabase.from('trip_clients').insert(
+        updates.clients.map(tc => ({
+          trip_id: id,
+          client_id: tc.clientId,
+          deposit_paid: tc.depositPaid,
+        }))
+      );
+    }
+    await loadData();
+  };
+
   const deleteTrip = async (id: string) => {
     await supabase.from('trips').delete().eq('id', id);
     await loadData();
@@ -222,7 +245,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setGuide = (g: Guide) => setGuideState(g);
 
   return (
-    <AppContext.Provider value={{ guide, setGuide, clients, trips, reports, loading, getClient, getTripsForClient, getReportForTrip, addClient, updateClient, addTrip, updateTrip, saveReport, updateProfile, updatePhotoUrl, deleteTrip, deleteClient }}>
+    <AppContext.Provider value={{ guide, setGuide, clients, trips, reports, loading, getClient, getTripsForClient, getReportForTrip, addClient, updateClient, addTrip, updateTrip, updateTripFull, saveReport, updateProfile, updatePhotoUrl, deleteTrip, deleteClient }}>
       {children}
     </AppContext.Provider>
   );
