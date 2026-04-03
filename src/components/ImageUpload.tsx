@@ -6,13 +6,14 @@ import { cn } from '../lib/utils';
 interface Props {
   currentUrl: string | null;
   onUploaded: (url: string) => void;
+  onUploadingChange?: (uploading: boolean) => void;
   path: string; // e.g. "userId/profile.jpg"
   shape?: 'circle' | 'square';
   size?: 'sm' | 'md' | 'lg';
   placeholder?: React.ReactNode;
 }
 
-export function ImageUpload({ currentUrl, onUploaded, path, shape = 'circle', size = 'md', placeholder }: Props) {
+export function ImageUpload({ currentUrl, onUploaded, onUploadingChange, path, shape = 'circle', size = 'md', placeholder }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentUrl);
@@ -26,6 +27,7 @@ export function ImageUpload({ currentUrl, onUploaded, path, shape = 'circle', si
   const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) return;
     setUploading(true);
+    onUploadingChange?.(true);
 
     // Show local preview immediately
     const localUrl = URL.createObjectURL(file);
@@ -40,14 +42,15 @@ export function ImageUpload({ currentUrl, onUploaded, path, shape = 'circle', si
 
     if (error) {
       console.error('Storage upload error:', error.message, error);
-      setPreview(currentUrl); // revert preview on failure
+      setPreview(currentUrl);
     } else {
       const { data } = supabase.storage.from('Guidebook').getPublicUrl(filePath);
-      const url = data.publicUrl + '?t=' + Date.now();
-      setPreview(url);
+      const url = data.publicUrl; // no cache-busting — clean URL saved to DB
+      setPreview(url + '?t=' + Date.now()); // cache-bust only for display
       onUploaded(url);
     }
     setUploading(false);
+    onUploadingChange?.(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {

@@ -22,6 +22,7 @@ export function ClientModal({ client, onClose }: Props) {
     notes: client?.notes ?? '',
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   // Stable temp ID for new client photo path
   const [tempId] = useState(() => `new-${Date.now()}`);
 
@@ -53,6 +54,7 @@ export function ClientModal({ client, onClose }: Props) {
             <ImageUpload
               currentUrl={photoUrl}
               onUploaded={setPhotoUrl}
+              onUploadingChange={setUploading}
               path={photoPath}
               shape="circle"
               size="md"
@@ -88,8 +90,8 @@ export function ClientModal({ client, onClose }: Props) {
 
         <div className="px-5 pb-5 flex gap-3">
           <button onClick={onClose} className="flex-1 py-2.5 text-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50">Cancel</button>
-          <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 text-sm bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-lg font-medium flex items-center justify-center gap-2">
-            <Plus size={15} />{saving ? 'Saving...' : client ? 'Save Changes' : 'Add Client'}
+          <button onClick={handleSave} disabled={saving || uploading} className="flex-1 py-2.5 text-sm bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-lg font-medium flex items-center justify-center gap-2">
+            <Plus size={15} />{uploading ? 'Uploading...' : saving ? 'Saving...' : client ? 'Save Changes' : 'Add Client'}
           </button>
         </div>
       </div>

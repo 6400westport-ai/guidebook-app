@@ -3,9 +3,10 @@ import { useApp } from '../context/AppContext';
 import { Layout } from '../components/layout/Layout';
 import { Header } from '../components/layout/Header';
 import { TripCard } from '../components/TripCard';
+import { ClientDetailModal } from '../components/ClientDetailModal';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { cn } from '../lib/utils';
-import type { Trip } from '../types';
+import type { Trip, Client } from '../types';
 import { AddTripModal } from '../components/AddTripModal';
 import { TripDetailModal } from '../components/TripDetailModal';
 
@@ -15,6 +16,7 @@ export function Trips() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -128,6 +130,7 @@ export function Trips() {
                   trip={trip}
                   clients={clients}
                   onClick={() => setSelectedTrip(trip)}
+                  onClientClick={setSelectedClient}
                 />
               ))
             }
@@ -147,6 +150,7 @@ export function Trips() {
           onClose={() => setSelectedTrip(null)}
         />
       )}
+      {selectedClient && <ClientDetailModal client={selectedClient} onClose={() => setSelectedClient(null)} />}
     </Layout>
   );
 }

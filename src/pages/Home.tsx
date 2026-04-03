@@ -1,13 +1,17 @@
+import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useWeather } from '../hooks/useWeather';
 import { Layout } from '../components/layout/Layout';
 import { Header } from '../components/layout/Header';
 import { TripCard } from '../components/TripCard';
+import { ClientDetailModal } from '../components/ClientDetailModal';
 import { weatherDescription, weatherEmoji, windDirectionLabel } from '../lib/utils';
 import { Wind, Sunrise, Sunset } from 'lucide-react';
+import type { Client } from '../types';
 
 export function Home() {
   const { guide, trips, clients } = useApp();
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const { weather, loading: weatherLoading } = useWeather(guide?.latitude ?? 32.7765, guide?.longitude ?? -79.9311);
 
   if (!guide) return <Layout><div className="text-sm text-slate-400">Loading...</div></Layout>;
@@ -35,7 +39,7 @@ export function Home() {
           <section>
             <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Today's Trip</h2>
             {todayTrip ? (
-              <TripCard trip={todayTrip} clients={clients} />
+              <TripCard trip={todayTrip} clients={clients} onClientClick={setSelectedClient} />
             ) : (
               <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm">
                 No trip scheduled today — enjoy the day off.
@@ -48,7 +52,7 @@ export function Home() {
             {weekTrips.length > 0 ? (
               <div className="space-y-3">
                 {weekTrips.map(trip => (
-                  <TripCard key={trip.id} trip={trip} clients={clients} compact />
+                  <TripCard key={trip.id} trip={trip} clients={clients} compact onClientClick={setSelectedClient} />
                 ))}
               </div>
             ) : (
@@ -116,6 +120,7 @@ export function Home() {
           )}
         </div>
       </div>
+      {selectedClient && <ClientDetailModal client={selectedClient} onClose={() => setSelectedClient(null)} />}
     </Layout>
   );
 }
