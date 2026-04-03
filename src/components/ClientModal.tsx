@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, User } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { ImageUpload } from './ImageUpload';
 import type { Client } from '../types';
 
 interface Props {
@@ -9,7 +11,9 @@ interface Props {
 }
 
 export function ClientModal({ client, onClose }: Props) {
-  const { clients, setClients } = useApp();
+  const { addClient, updateClient } = useApp();
+  const { user } = useAuth();
+  const [photoUrl, setPhotoUrl] = useState<string | null>(client?.photoUrl ?? null);
   const [form, setForm] = useState({
     firstName: client?.firstName ?? '',
     lastName: client?.lastName ?? '',
@@ -17,19 +21,20 @@ export function ClientModal({ client, onClose }: Props) {
     phone: client?.phone ?? '',
     notes: client?.notes ?? '',
   });
+  const [saving, setSaving] = useState(false);
+  // Stable temp ID for new client photo path
+  const [tempId] = useState(() => `new-${Date.now()}`);
 
-  const handleSave = () => {
+  const clientId = client?.id ?? tempId;
+  const photoPath = `${user?.id}/clients/${clientId}.jpg`;
+
+  const handleSave = async () => {
     if (!form.firstName || !form.lastName) return;
+    setSaving(true);
     if (client) {
-      setClients(clients.map(c => c.id === client.id ? { ...c, ...form } : c));
+      await updateClient(client.id, { ...form, photoUrl });
     } else {
-      const newClient: Client = {
-        id: `client-${Date.now()}`,
-        ...form,
-        photoUrl: null,
-        createdAt: new Date().toISOString(),
-      };
-      setClients([...clients, newClient]);
+      await addClient({ ...form, photoUrl });
     }
     onClose();
   };
@@ -42,7 +47,23 @@ export function ClientModal({ client, onClose }: Props) {
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><X size={18} /></button>
         </div>
 
-        <div className="p-5 space-y-3">
+        <div className="p-5 space-y-4">
+          {/* Photo upload */}
+          <div className="flex items-center gap-4">
+            <ImageUpload
+              currentUrl={photoUrl}
+              onUploaded={setPhotoUrl}
+              path={photoPath}
+              shape="circle"
+              size="md"
+              placeholder={<User size={20} className="text-brand-300" />}
+            />
+            <div>
+              <p className="text-sm font-medium text-slate-700">Client Photo</p>
+              <p className="text-xs text-slate-400 mt-0.5">Click to upload</p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: 'First Name', field: 'firstName' },
@@ -67,8 +88,8 @@ export function ClientModal({ client, onClose }: Props) {
 
         <div className="px-5 pb-5 flex gap-3">
           <button onClick={onClose} className="flex-1 py-2.5 text-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50">Cancel</button>
-          <button onClick={handleSave} className="flex-1 py-2.5 text-sm bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium flex items-center justify-center gap-2">
-            <Plus size={15} />{client ? 'Save Changes' : 'Add Client'}
+          <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 text-sm bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-lg font-medium flex items-center justify-center gap-2">
+            <Plus size={15} />{saving ? 'Saving...' : client ? 'Save Changes' : 'Add Client'}
           </button>
         </div>
       </div>

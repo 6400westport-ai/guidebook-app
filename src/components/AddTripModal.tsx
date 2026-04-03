@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Plus } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import type { Trip, TripClient, TripDuration, TripType } from '../types';
+import type { TripClient, TripDuration, TripType } from '../types';
 
 interface Props {
   defaultDate: string;
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function AddTripModal({ defaultDate, onClose }: Props) {
-  const { clients, trips, setTrips } = useApp();
+  const { clients, addTrip } = useApp();
   const [form, setForm] = useState({
     date: defaultDate,
     duration: 'full' as TripDuration,
@@ -18,6 +18,7 @@ export function AddTripModal({ defaultDate, onClose }: Props) {
     notes: '',
   });
   const [selectedClients, setSelectedClients] = useState<TripClient[]>([]);
+  const [saving, setSaving] = useState(false);
 
   const toggleClient = (clientId: string) => {
     setSelectedClients(prev =>
@@ -33,15 +34,10 @@ export function AddTripModal({ defaultDate, onClose }: Props) {
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.date || !form.location) return;
-    const newTrip: Trip = {
-      id: `trip-${Date.now()}`,
-      ...form,
-      clients: selectedClients,
-      status: 'upcoming',
-    };
-    setTrips([...trips, newTrip]);
+    setSaving(true);
+    await addTrip({ ...form, clients: selectedClients });
     onClose();
   };
 
@@ -124,8 +120,8 @@ export function AddTripModal({ defaultDate, onClose }: Props) {
 
         <div className="px-5 pb-5 flex gap-3">
           <button onClick={onClose} className="flex-1 py-2.5 text-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
-          <button onClick={handleSave} className="flex-1 py-2.5 text-sm bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
-            <Plus size={15} />Save Trip
+          <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 text-sm bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+            <Plus size={15} />{saving ? 'Saving...' : 'Save Trip'}
           </button>
         </div>
       </div>

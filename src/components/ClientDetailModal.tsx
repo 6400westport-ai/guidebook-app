@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, User, Phone, Mail, FileText, Edit } from 'lucide-react';
+import { X, Phone, Mail, FileText, Edit } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { Client } from '../types';
 import { formatDate } from '../lib/utils';
@@ -34,7 +34,7 @@ export function ClientDetailModal({ client, onClose }: Props) {
               {client.photoUrl ? (
                 <img src={client.photoUrl} alt={client.firstName} className="w-full h-full object-cover" />
               ) : (
-                <User size={24} className="text-brand-400" />
+                <span className="text-xl font-bold text-brand-400">{client.firstName[0]}</span>
               )}
             </div>
             <div className="space-y-1.5">

@@ -1,6 +1,6 @@
 import type { Trip, Client } from '../types';
 import { formatDate } from '../lib/utils';
-import { Clock, MapPin, Fish, Users } from 'lucide-react';
+import { Clock, MapPin, Fish } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface TripCardProps {
@@ -48,12 +48,20 @@ export function TripCard({ trip, clients, onClick, compact }: TripCardProps) {
       </div>
 
       {!compact && (
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <Users size={11} className="text-slate-400" />
+        <div className="flex items-center gap-2 flex-wrap">
           {tripClients.map(c => (
-            <span key={c.id} className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-              {c.firstName} {c.lastName}
-            </span>
+            <div key={c.id} className="flex items-center gap-1.5 bg-slate-100 rounded-full pl-0.5 pr-2.5 py-0.5">
+              <div className="w-5 h-5 rounded-full bg-brand-200 overflow-hidden flex-shrink-0">
+                {c.photoUrl ? (
+                  <img src={c.photoUrl} alt={c.firstName} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-brand-600 text-xs font-bold">
+                    {c.firstName[0]}
+                  </div>
+                )}
+              </div>
+              <span className="text-xs text-slate-600">{c.firstName} {c.lastName}</span>
+            </div>
           ))}
           {trip.clients.some(tc => !tc.depositPaid) && (
             <span className="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full ml-auto">Deposit pending</span>

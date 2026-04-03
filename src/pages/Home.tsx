@@ -8,7 +8,9 @@ import { Wind, Sunrise, Sunset } from 'lucide-react';
 
 export function Home() {
   const { guide, trips, clients } = useApp();
-  const { weather, loading: weatherLoading } = useWeather(guide.latitude, guide.longitude);
+  const { weather, loading: weatherLoading } = useWeather(guide?.latitude ?? 32.7765, guide?.longitude ?? -79.9311);
+
+  if (!guide) return <Layout><div className="text-sm text-slate-400">Loading...</div></Layout>;
 
   const today = new Date().toISOString().split('T')[0];
   const nextWeek = new Date();

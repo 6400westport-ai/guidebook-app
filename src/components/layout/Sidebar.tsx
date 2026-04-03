@@ -18,7 +18,7 @@ export function Sidebar() {
   const NavContent = () => (
     <div className="flex flex-col h-full">
       <div className="px-5 pt-6 pb-5 border-b border-slate-100">
-        {guide.logoUrl ? (
+        {guide?.logoUrl ? (
           <img src={guide.logoUrl} alt="Business logo" className="h-10 w-auto mb-3 object-contain" />
         ) : (
           <div className="flex items-center gap-2 mb-1">
@@ -28,7 +28,7 @@ export function Sidebar() {
           </div>
         )}
         <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest">Guidebook</p>
-        <p className="text-sm font-medium text-slate-700 mt-0.5 leading-tight">{guide.businessName}</p>
+        <p className="text-sm font-medium text-slate-700 mt-0.5 leading-tight">{guide?.businessName ?? ''}</p>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
@@ -54,7 +54,7 @@ export function Sidebar() {
       </nav>
 
       <div className="px-5 py-4 border-t border-slate-100">
-        <p className="text-xs text-slate-400">{guide.location}</p>
+        <p className="text-xs text-slate-400">{guide?.location ?? ''}</p>
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ import { getGreeting } from '../../lib/utils';
 export function Header({ title }: { title?: string }) {
   const { guide } = useApp();
 
+  if (!guide) return null;
+
   return (
     <header className="flex items-center justify-between mb-6 md:mb-8">
       <div>
