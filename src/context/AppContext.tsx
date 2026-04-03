@@ -238,8 +238,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Strip cache-busting param before saving to DB
     const cleanUrl = url.split('?')[0];
     await supabase.from('profiles').update({ [dbField]: cleanUrl }).eq('id', user!.id);
-    // Update local state immediately — no full reload needed
-    setGuideState(prev => prev ? { ...prev, [field]: cleanUrl } : prev);
+    // Keep the ?t= timestamp in local state so the browser fetches the fresh image
+    setGuideState(prev => prev ? { ...prev, [field]: url } : prev);
   };
 
   const setGuide = (g: Guide) => setGuideState(g);
