@@ -20,6 +20,8 @@ interface AppContextType {
   saveReport: (tripId: string, notes: string, existingReportId?: string) => Promise<void>;
   updateProfile: (updates: Partial<Guide>) => Promise<void>;
   updatePhotoUrl: (field: 'photoUrl' | 'logoUrl', url: string) => Promise<void>;
+  deleteTrip: (id: string) => Promise<void>;
+  deleteClient: (id: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -198,6 +200,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await loadData();
   };
 
+  const deleteTrip = async (id: string) => {
+    await supabase.from('trips').delete().eq('id', id);
+    await loadData();
+  };
+
+  const deleteClient = async (id: string) => {
+    await supabase.from('clients').delete().eq('id', id);
+    await loadData();
+  };
+
   const updatePhotoUrl = async (field: 'photoUrl' | 'logoUrl', url: string) => {
     const dbField = field === 'photoUrl' ? 'photo_url' : 'logo_url';
     // Strip cache-busting param before saving to DB
@@ -210,7 +222,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setGuide = (g: Guide) => setGuideState(g);
 
   return (
-    <AppContext.Provider value={{ guide, setGuide, clients, trips, reports, loading, getClient, getTripsForClient, getReportForTrip, addClient, updateClient, addTrip, updateTrip, saveReport, updateProfile, updatePhotoUrl }}>
+    <AppContext.Provider value={{ guide, setGuide, clients, trips, reports, loading, getClient, getTripsForClient, getReportForTrip, addClient, updateClient, addTrip, updateTrip, saveReport, updateProfile, updatePhotoUrl, deleteTrip, deleteClient }}>
       {children}
     </AppContext.Provider>
   );

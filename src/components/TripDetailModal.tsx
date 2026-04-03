@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Clock, Fish, FileText, CheckCircle, Circle } from 'lucide-react';
+import { X, Clock, Fish, FileText, CheckCircle, Circle, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { Trip } from '../types';
 import { formatDate } from '../lib/utils';
@@ -13,24 +13,29 @@ interface Props {
 const tripTypeLabel: Record<string, string> = { fly: 'Fly', spin: 'Spin', both: 'Fly & Spin' };
 
 export function TripDetailModal({ trip, onClose }: Props) {
-  const { clients, reports, updateTrip, saveReport } = useApp();
+  const { clients, reports, saveReport, deleteTrip } = useApp();
   const tripClients = trip.clients.map(tc => ({
     client: clients.find(c => c.id === tc.clientId),
     depositPaid: tc.depositPaid,
   }));
   const existingReport = reports.find(r => r.tripId === trip.id);
   const [reportNotes, setReportNotes] = useState(existingReport?.notes ?? '');
-  const [showReport, setShowReport] = useState(!!existingReport);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const markComplete = async () => {
-    await updateTrip(trip.id, { status: 'completed' });
-    setShowReport(true);
-  };
+  // Treat any trip in the past as completed regardless of stored status
+  const isPast = trip.date < new Date().toISOString().split('T')[0];
 
   const handleSaveReport = async () => {
     setSaving(true);
     await saveReport(trip.id, reportNotes, existingReport?.id);
+    onClose();
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    await deleteTrip(trip.id);
     onClose();
   };
 
@@ -46,15 +51,19 @@ export function TripDetailModal({ trip, onClose }: Props) {
         </div>
 
         <div className="p-5 space-y-4">
-          <div className="flex items-center gap-4 text-sm text-slate-600">
+          {/* Duration + type */}
+          <div className="flex items-center gap-3 text-sm text-slate-600">
             <span className="flex items-center gap-1.5"><Clock size={14} className="text-slate-400" />{trip.duration === 'full' ? 'Full Day' : 'Half Day'}</span>
             <span className="flex items-center gap-1.5"><Fish size={14} className="text-slate-400" />{tripTypeLabel[trip.tripType]}</span>
             <span className={cn(
               'ml-auto text-xs font-medium px-2 py-0.5 rounded-full',
-              trip.status === 'upcoming' ? 'bg-brand-50 text-brand-700' : 'bg-sage-100 text-sage-700'
-            )}>{trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}</span>
+              isPast ? 'bg-sage-100 text-sage-700' : 'bg-brand-50 text-brand-700'
+            )}>
+              {isPast ? 'Completed' : 'Upcoming'}
+            </span>
           </div>
 
+          {/* Clients */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Clients</p>
             <div className="space-y-2">
@@ -81,6 +90,7 @@ export function TripDetailModal({ trip, onClose }: Props) {
             </div>
           </div>
 
+          {/* Notes */}
           {trip.notes && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Notes</p>
@@ -88,14 +98,8 @@ export function TripDetailModal({ trip, onClose }: Props) {
             </div>
           )}
 
-          {trip.status === 'upcoming' && (
-            <button onClick={markComplete}
-              className="w-full py-2.5 text-sm border border-sage-300 text-sage-700 rounded-lg hover:bg-sage-50 transition-colors font-medium">
-              Mark Trip as Completed
-            </button>
-          )}
-
-          {(showReport || trip.status === 'completed') && (
+          {/* Trip report — shown for past trips */}
+          {isPast && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1.5">
                 <FileText size={11} />Trip Report
@@ -111,6 +115,30 @@ export function TripDetailModal({ trip, onClose }: Props) {
                 className="mt-2 w-full py-2.5 text-sm bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-lg font-medium transition-colors">
                 {saving ? 'Saving...' : 'Save Report'}
               </button>
+            </div>
+          )}
+
+          {/* Delete */}
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-600 transition-colors mx-auto"
+            >
+              <Trash2 size={13} />
+              Delete Trip
+            </button>
+          ) : (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center space-y-2">
+              <p className="text-sm font-medium text-red-700">Delete this trip?</p>
+              <p className="text-xs text-red-500">This cannot be undone.</p>
+              <div className="flex gap-2 justify-center">
+                <button onClick={() => setConfirmDelete(false)} className="px-4 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50">
+                  Cancel
+                </button>
+                <button onClick={handleDelete} disabled={deleting} className="px-4 py-1.5 text-xs bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-lg font-medium">
+                  {deleting ? 'Deleting...' : 'Yes, Delete'}
+                </button>
+              </div>
             </div>
           )}
         </div>
