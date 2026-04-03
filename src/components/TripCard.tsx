@@ -1,6 +1,6 @@
 import type { Trip, Client } from '../types';
 import { formatDate } from '../lib/utils';
-import { Clock, MapPin, Fish, History } from 'lucide-react';
+import { Clock, MapPin, Fish, History, Pencil } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useApp } from '../context/AppContext';
 
@@ -9,12 +9,13 @@ interface TripCardProps {
   clients: Client[];
   onClick?: () => void;
   onClientClick?: (client: Client) => void;
+  onEdit?: () => void;
   compact?: boolean;
 }
 
 const tripTypeLabel: Record<string, string> = { fly: 'Fly', spin: 'Spin', both: 'Fly & Spin' };
 
-export function TripCard({ trip, clients, onClick, onClientClick, compact }: TripCardProps) {
+export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compact }: TripCardProps) {
   const { getTripsForClient } = useApp();
   const tripClients = trip.clients.map(tc => clients.find(c => c.id === tc.clientId)).filter(Boolean) as Client[];
 
@@ -58,6 +59,14 @@ export function TripCard({ trip, clients, onClick, onClientClick, compact }: Tri
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          {onEdit && (
+            <button
+              onClick={e => { e.stopPropagation(); onEdit(); }}
+              className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <Pencil size={13} />
+            </button>
+          )}
           {trip.status === 'upcoming' ? (
             allDepositsPaid ? (
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
