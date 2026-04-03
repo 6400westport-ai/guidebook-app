@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { User } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
-export function Header({ title }: { title?: string }) {
+export function Header({ title, weatherEmoji }: { title?: string; weatherEmoji?: string }) {
   const { guide } = useApp();
 
   if (!guide) return null;
@@ -16,11 +16,16 @@ export function Header({ title }: { title?: string }) {
         {title ? (
           <h1 className="text-xl font-semibold text-slate-800">{title}</h1>
         ) : (
-          <div>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-0.5">{timeOfDay}</p>
-            <h1 className="text-2xl font-bold text-slate-800 leading-tight">
-              Capt. <span className="text-brand-500">{guide.firstName}</span>
-            </h1>
+          <div className="flex items-center gap-3">
+            {weatherEmoji && (
+              <span className="text-4xl leading-none">{weatherEmoji}</span>
+            )}
+            <div>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-0.5">{timeOfDay}</p>
+              <h1 className="text-2xl font-bold text-slate-800 leading-tight">
+                Capt. <span className="text-brand-500">{guide.firstName}</span>
+              </h1>
+            </div>
           </div>
         )}
       </div>
