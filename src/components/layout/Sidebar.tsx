@@ -18,9 +18,8 @@ export function Sidebar() {
   const NavContent = () => (
     <div className="flex flex-col h-full">
       <div className="px-5 pt-6 pb-5 border-b border-slate-100">
-        <img src="/fish.png" alt="Guidebook" className="h-10 w-auto mb-3 object-contain" />
-        <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest">Guidebook</p>
-        <p className="text-sm font-medium text-slate-700 mt-0.5 leading-tight">{guide?.businessName ?? ''}</p>
+        <img src="/fish.png" alt="Guidebook" className="h-10 w-auto mb-2 object-contain" />
+        <p className="text-sm font-semibold text-brand-600 leading-tight">{guide?.businessName ?? ''}</p>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
