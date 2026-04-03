@@ -45,9 +45,9 @@ export function ImageUpload({ currentUrl, onUploaded, onUploadingChange, path, s
       setPreview(currentUrl);
     } else {
       const { data } = supabase.storage.from('Guidebook').getPublicUrl(filePath);
-      const url = data.publicUrl; // no cache-busting — clean URL saved to DB
-      setPreview(url + '?t=' + Date.now()); // cache-bust only for display
-      onUploaded(url);
+      const urlWithBust = data.publicUrl + '?t=' + Date.now();
+      setPreview(urlWithBust);
+      onUploaded(urlWithBust); // caller strips ?t= before saving to DB
     }
     setUploading(false);
     onUploadingChange?.(false);
