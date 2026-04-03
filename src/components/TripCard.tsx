@@ -1,7 +1,8 @@
 import type { Trip, Client } from '../types';
 import { formatDate } from '../lib/utils';
-import { Clock, MapPin, Fish } from 'lucide-react';
+import { Clock, MapPin, Fish, History } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useApp } from '../context/AppContext';
 
 interface TripCardProps {
   trip: Trip;
@@ -14,7 +15,17 @@ interface TripCardProps {
 const tripTypeLabel: Record<string, string> = { fly: 'Fly', spin: 'Spin', both: 'Fly & Spin' };
 
 export function TripCard({ trip, clients, onClick, onClientClick, compact }: TripCardProps) {
+  const { getTripsForClient } = useApp();
   const tripClients = trip.clients.map(tc => clients.find(c => c.id === tc.clientId)).filter(Boolean) as Client[];
+
+  const allDepositsPaid = trip.clients.length > 0 && trip.clients.every(tc => tc.depositPaid);
+  const anyDepositMissing = trip.clients.some(tc => !tc.depositPaid);
+
+  // Check if any client has past completed trips
+  const clientsWithHistory = tripClients.filter(c => {
+    const pastTrips = getTripsForClient(c.id).filter(t => t.id !== trip.id && t.status === 'completed');
+    return pastTrips.length > 0;
+  });
 
   return (
     <div
@@ -25,7 +36,38 @@ export function TripCard({ trip, clients, onClick, onClientClick, compact }: Tri
         compact ? 'space-y-2' : 'space-y-3'
       )}
     >
-      {/* Clients - always at top */}
+      {/* Date + deposit status — always at top */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className={cn('font-semibold text-slate-800', compact ? 'text-xs' : 'text-sm')}>{formatDate(trip.date)}</p>
+          <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+            <Clock size={10} />
+            {trip.duration === 'full' ? 'Full Day' : 'Half Day'}
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          {trip.status === 'upcoming' ? (
+            allDepositsPaid ? (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                Deposit Paid
+              </span>
+            ) : anyDepositMissing ? (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                Deposit Needed
+              </span>
+            ) : null
+          ) : (
+            <span className={cn(
+              'text-xs font-medium px-2 py-0.5 rounded-full',
+              trip.status === 'completed' ? 'bg-sage-100 text-sage-700' : 'bg-red-50 text-red-600'
+            )}>
+              {trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Clients */}
       {tripClients.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
           {tripClients.map(c => (
@@ -50,10 +92,7 @@ export function TripCard({ trip, clients, onClick, onClientClick, compact }: Tri
                   </div>
                 )}
               </div>
-              <span className={cn(
-                'font-semibold text-slate-800',
-                compact ? 'text-xs' : 'text-sm'
-              )}>
+              <span className={cn('font-semibold text-slate-800', compact ? 'text-xs' : 'text-sm')}>
                 {c.firstName} {c.lastName}
               </span>
             </div>
@@ -61,35 +100,28 @@ export function TripCard({ trip, clients, onClick, onClientClick, compact }: Tri
         </div>
       )}
 
-      {/* Date + status */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className={cn('font-semibold text-slate-800', compact ? 'text-xs' : 'text-sm')}>{formatDate(trip.date)}</p>
-          <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-            <Clock size={10} />
-            {trip.duration === 'full' ? 'Full Day' : 'Half Day'}
-          </p>
-        </div>
-        <span className={cn(
-          'text-xs font-medium px-2 py-0.5 rounded-full',
-          trip.status === 'upcoming' ? 'bg-brand-50 text-brand-700' :
-          trip.status === 'completed' ? 'bg-sage-100 text-sage-700' :
-          'bg-red-50 text-red-600'
-        )}>
-          {trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}
-        </span>
-      </div>
-
       {/* Location + type */}
       <div className="flex items-center gap-3 text-xs text-slate-500">
         <span className="flex items-center gap-1"><MapPin size={11} className="text-slate-400" />{trip.location}</span>
         <span className="flex items-center gap-1"><Fish size={11} className="text-slate-400" />{tripTypeLabel[trip.tripType]}</span>
       </div>
 
-      {/* Deposit pending (non-compact only) */}
-      {!compact && trip.clients.some(tc => !tc.depositPaid) && (
-        <div>
-          <span className="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full">Deposit pending</span>
+      {/* Past trips link */}
+      {!compact && clientsWithHistory.length > 0 && onClientClick && (
+        <div className="border-t border-slate-100 pt-2 flex flex-wrap gap-2">
+          {clientsWithHistory.map(c => {
+            const pastCount = getTripsForClient(c.id).filter(t => t.id !== trip.id && t.status === 'completed').length;
+            return (
+              <button
+                key={c.id}
+                onClick={(e) => { e.stopPropagation(); onClientClick(c); }}
+                className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-800 font-medium"
+              >
+                <History size={11} />
+                {c.firstName} — {pastCount} past {pastCount === 1 ? 'trip' : 'trips'}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
