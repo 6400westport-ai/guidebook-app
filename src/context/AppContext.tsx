@@ -235,10 +235,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updatePhotoUrl = async (field: 'photoUrl' | 'logoUrl', url: string) => {
     const dbField = field === 'photoUrl' ? 'photo_url' : 'logo_url';
-    // Strip cache-busting param before saving to DB
-    const cleanUrl = url.split('?')[0];
-    await supabase.from('profiles').update({ [dbField]: cleanUrl }).eq('id', user!.id);
-    // Keep the ?t= timestamp in local state so the browser fetches the fresh image
+    // Save the URL with the cache-busting timestamp to DB so reloads always get a fresh URL
+    await supabase.from('profiles').update({ [dbField]: url }).eq('id', user!.id);
     setGuideState(prev => prev ? { ...prev, [field]: url } : prev);
   };
 
