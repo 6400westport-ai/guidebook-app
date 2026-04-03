@@ -30,19 +30,24 @@ export function Header({ title, weatherEmoji }: { title?: string; weatherEmoji?:
         )}
       </div>
 
-      <Link to="/profile" className="flex items-center gap-2.5 bg-white border border-slate-200 rounded-full pl-2 pr-4 py-1.5 shadow-sm hover:shadow-md transition-shadow">
-        <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center overflow-hidden">
-          {guide.photoUrl ? (
-            <img src={guide.photoUrl} alt={guide.name} className="w-full h-full object-cover" />
-          ) : (
-            <User size={16} className="text-brand-600" />
-          )}
-        </div>
-        <div className="leading-tight">
-          <p className="text-xs font-semibold text-slate-800">{guide.name}</p>
-          <p className="text-xs text-slate-400">{guide.businessName}</p>
-        </div>
-      </Link>
+      <div className="flex items-center gap-3">
+        {guide.logoUrl && (
+          <img src={guide.logoUrl} alt="Business logo" className="h-10 w-auto object-contain" />
+        )}
+        <Link to="/profile" className="flex items-center gap-2.5 bg-white border border-slate-200 rounded-full pl-2 pr-4 py-1.5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center overflow-hidden">
+            {guide.photoUrl ? (
+              <img src={guide.photoUrl} alt={guide.name} className="w-full h-full object-cover" />
+            ) : (
+              <User size={16} className="text-brand-600" />
+            )}
+          </div>
+          <div className="leading-tight">
+            <p className="text-xs font-semibold text-slate-800">{guide.name}</p>
+            <p className="text-xs text-slate-400">{guide.businessName}</p>
+          </div>
+        </Link>
+      </div>
     </header>
   );
 }
