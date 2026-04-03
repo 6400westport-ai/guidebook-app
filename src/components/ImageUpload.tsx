@@ -35,12 +35,14 @@ export function ImageUpload({ currentUrl, onUploaded, path, shape = 'circle', si
     const filePath = path.replace(/\.[^.]+$/, '') + '.' + ext;
 
     const { error } = await supabase.storage
-      .from('guidebook')
+      .from('Guidebook')
       .upload(filePath, file, { upsert: true });
 
-    if (!error) {
-      const { data } = supabase.storage.from('guidebook').getPublicUrl(filePath);
-      // Add cache-busting param so browser reloads updated image
+    if (error) {
+      console.error('Storage upload error:', error.message, error);
+      setPreview(currentUrl); // revert preview on failure
+    } else {
+      const { data } = supabase.storage.from('Guidebook').getPublicUrl(filePath);
       const url = data.publicUrl + '?t=' + Date.now();
       setPreview(url);
       onUploaded(url);
