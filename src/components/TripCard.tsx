@@ -36,16 +36,28 @@ export function TripCard({ trip, clients, onClick, onClientClick, compact }: Tri
         compact ? 'space-y-2' : 'space-y-3'
       )}
     >
-      {/* Date + deposit status — always at top */}
-      <div className="flex items-center justify-between">
+      {/* Date + duration + trip type + deposit status */}
+      <div className="flex items-start justify-between gap-2">
         <div>
           <p className={cn('font-semibold text-slate-800', compact ? 'text-xs' : 'text-sm')}>{formatDate(trip.date)}</p>
-          <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-            <Clock size={10} />
-            {trip.duration === 'full' ? 'Full Day' : 'Half Day'}
-          </p>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span className={cn(
+              'inline-flex items-center gap-1 font-semibold rounded-md px-1.5 py-0.5',
+              compact ? 'text-xs bg-slate-100 text-slate-600' : 'text-xs bg-brand-100 text-brand-700'
+            )}>
+              <Clock size={10} />
+              {trip.duration === 'full' ? 'Full Day' : 'Half Day'}
+            </span>
+            <span className={cn(
+              'inline-flex items-center gap-1 font-semibold rounded-md px-1.5 py-0.5',
+              compact ? 'text-xs bg-slate-100 text-slate-600' : 'text-xs bg-brand-100 text-brand-700'
+            )}>
+              <Fish size={10} />
+              {tripTypeLabel[trip.tripType]}
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-1 flex-shrink-0">
           {trip.status === 'upcoming' ? (
             allDepositsPaid ? (
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
@@ -100,11 +112,17 @@ export function TripCard({ trip, clients, onClick, onClientClick, compact }: Tri
         </div>
       )}
 
-      {/* Location + type */}
-      <div className="flex items-center gap-3 text-xs text-slate-500">
-        <span className="flex items-center gap-1"><MapPin size={11} className="text-slate-400" />{trip.location}</span>
-        <span className="flex items-center gap-1"><Fish size={11} className="text-slate-400" />{tripTypeLabel[trip.tripType]}</span>
-      </div>
+      {/* Location */}
+      {trip.location && (
+        <div className="flex items-center gap-1 text-xs text-slate-500">
+          <MapPin size={11} className="text-slate-400 flex-shrink-0" />{trip.location}
+        </div>
+      )}
+
+      {/* Guide notes */}
+      {trip.notes && (
+        <p className="text-xs text-slate-500 leading-relaxed italic">{trip.notes}</p>
+      )}
 
       {/* Past trips link */}
       {!compact && clientsWithHistory.length > 0 && onClientClick && (
