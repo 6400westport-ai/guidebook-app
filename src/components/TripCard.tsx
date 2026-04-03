@@ -56,36 +56,34 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
               <Fish size={10} />
               {tripTypeLabel[trip.tripType]}
             </span>
+            {trip.status === 'upcoming' ? (
+              allDepositsPaid ? (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                  Deposit Paid
+                </span>
+              ) : anyDepositMissing ? (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                  Deposit Needed
+                </span>
+              ) : null
+            ) : (
+              <span className={cn(
+                'text-xs font-medium px-2 py-0.5 rounded-full',
+                trip.status === 'completed' ? 'bg-sage-100 text-sage-700' : 'bg-red-50 text-red-600'
+              )}>
+                {trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}
+              </span>
+            )}
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          {onEdit && (
-            <button
-              onClick={e => { e.stopPropagation(); onEdit(); }}
-              className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              <Pencil size={13} />
-            </button>
-          )}
-          {trip.status === 'upcoming' ? (
-            allDepositsPaid ? (
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
-                Deposit Paid
-              </span>
-            ) : anyDepositMissing ? (
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
-                Deposit Needed
-              </span>
-            ) : null
-          ) : (
-            <span className={cn(
-              'text-xs font-medium px-2 py-0.5 rounded-full',
-              trip.status === 'completed' ? 'bg-sage-100 text-sage-700' : 'bg-red-50 text-red-600'
-            )}>
-              {trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}
-            </span>
-          )}
-        </div>
+        {onEdit && (
+          <button
+            onClick={e => { e.stopPropagation(); onEdit(); }}
+            className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"
+          >
+            <Pencil size={13} />
+          </button>
+        )}
       </div>
 
       {/* Clients */}
