@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, CalendarDays, Users, BarChart3, Menu, X, Fish } from 'lucide-react';
+import { Home, CalendarDays, Users, BarChart3, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { cn } from '../../lib/utils';
@@ -18,15 +18,7 @@ export function Sidebar() {
   const NavContent = () => (
     <div className="flex flex-col h-full">
       <div className="px-5 pt-6 pb-5 border-b border-slate-100">
-        {guide?.logoUrl ? (
-          <img src={guide.logoUrl} alt="Business logo" className="h-10 w-auto mb-3 object-contain" />
-        ) : (
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
-              <Fish size={16} className="text-white" />
-            </div>
-          </div>
-        )}
+        <img src="/fish.png" alt="Guidebook" className="h-10 w-auto mb-3 object-contain" />
         <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest">Guidebook</p>
         <p className="text-sm font-medium text-slate-700 mt-0.5 leading-tight">{guide?.businessName ?? ''}</p>
       </div>
@@ -67,9 +59,7 @@ export function Sidebar() {
 
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 flex items-center justify-between px-4 h-14">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-brand-500 flex items-center justify-center">
-            <Fish size={14} className="text-white" />
-          </div>
+          <img src="/fish.png" alt="Guidebook" className="h-7 w-auto object-contain" />
           <span className="text-sm font-semibold text-brand-600 uppercase tracking-widest">Guidebook</span>
         </div>
         <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-lg text-slate-600 hover:bg-slate-100">
