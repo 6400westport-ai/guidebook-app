@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom';
 import { User } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { getGreeting } from '../../lib/utils';
 
 export function Header({ title }: { title?: string }) {
   const { guide } = useApp();
 
   if (!guide) return null;
+
+  const hour = new Date().getHours();
+  const timeOfDay = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
 
   return (
     <header className="flex items-center justify-between mb-6 md:mb-8">
@@ -14,7 +16,12 @@ export function Header({ title }: { title?: string }) {
         {title ? (
           <h1 className="text-xl font-semibold text-slate-800">{title}</h1>
         ) : (
-          <h1 className="text-xl font-semibold text-slate-800">{getGreeting(guide.firstName)}</h1>
+          <div>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-0.5">{timeOfDay}</p>
+            <h1 className="text-2xl font-bold text-slate-800 leading-tight">
+              Capt. <span className="text-brand-500">{guide.firstName}</span>
+            </h1>
+          </div>
         )}
       </div>
 
