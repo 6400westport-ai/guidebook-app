@@ -6,7 +6,8 @@ import { Header } from '../components/layout/Header';
 import { TripCard } from '../components/TripCard';
 import { ClientDetailModal } from '../components/ClientDetailModal';
 import { weatherDescription, weatherEmoji, windDirectionLabel } from '../lib/utils';
-import { Wind, Sunrise, Sunset } from 'lucide-react';
+import { Wind, Sunrise, Sunset, CalendarDays } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { Client } from '../types';
 
 export function Home() {
@@ -60,6 +61,10 @@ export function Home() {
                 No upcoming trips this week.
               </div>
             )}
+            <Link to="/trips" className="inline-flex items-center gap-1.5 mt-3 text-xs font-medium text-brand-600 hover:text-brand-800 transition-colors">
+              <CalendarDays size={13} />
+              View Calendar
+            </Link>
           </section>
         </div>
 

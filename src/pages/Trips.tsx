@@ -80,24 +80,57 @@ export function Trips() {
                   key={day}
                   onClick={() => handleDayClick(day)}
                   className={cn(
-                    'relative min-h-[52px] p-1 rounded-lg cursor-pointer transition-colors text-center',
+                    'relative min-h-[70px] p-1 rounded-lg cursor-pointer transition-colors',
                     isToday ? 'bg-brand-50 border border-brand-200' : 'hover:bg-slate-50',
                   )}
                 >
                   <span className={cn(
-                    'text-xs font-medium block mb-1',
+                    'text-xs font-medium block mb-1 text-center',
                     isToday ? 'text-brand-700' : 'text-slate-600'
                   )}>{day}</span>
-                  <div className="space-y-0.5">
-                    {dayTrips.slice(0, 2).map(trip => (
-                      <div key={trip.id} className={cn(
-                        'text-xs px-1 py-0.5 rounded text-center truncate',
-                        trip.status === 'completed' ? 'bg-sage-100 text-sage-700' : 'bg-brand-100 text-brand-700'
-                      )}>
-                        {trip.duration === 'full' ? 'Full' : 'Half'}
-                      </div>
-                    ))}
-                    {dayTrips.length > 2 && <div className="text-xs text-slate-400">+{dayTrips.length - 2}</div>}
+                  <div className="space-y-1">
+                    {dayTrips.slice(0, 2).map(trip => {
+                      const tripClients = trip.clients
+                        .map(tc => clients.find(c => c.id === tc.clientId))
+                        .filter(Boolean) as typeof clients;
+                      return (
+                        <div key={trip.id} className={cn(
+                          'rounded px-1 py-0.5',
+                          trip.status === 'completed' ? 'bg-sage-100' : 'bg-brand-100'
+                        )}>
+                          {/* Client photos */}
+                          {tripClients.some(c => c.photoUrl) && (
+                            <div className="flex gap-0.5 mb-0.5">
+                              {tripClients.filter(c => c.photoUrl).slice(0, 3).map(c => (
+                                <div
+                                  key={c.id}
+                                  onClick={e => { e.stopPropagation(); setSelectedClient(c); }}
+                                  className="w-4 h-4 rounded-full overflow-hidden flex-shrink-0 cursor-pointer ring-1 ring-white"
+                                >
+                                  <img src={c.photoUrl!} alt={c.firstName} className="w-full h-full object-cover" />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {/* Client names */}
+                          {tripClients.map(c => (
+                            <div
+                              key={c.id}
+                              onClick={e => { e.stopPropagation(); setSelectedClient(c); }}
+                              className={cn(
+                                'text-xs truncate cursor-pointer hover:underline leading-tight',
+                                trip.status === 'completed' ? 'text-sage-700' : 'text-brand-700'
+                              )}
+                            >
+                              {c.firstName}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                    {dayTrips.length > 2 && (
+                      <div className="text-xs text-slate-400 text-center">+{dayTrips.length - 2}</div>
+                    )}
                   </div>
                 </div>
               );
