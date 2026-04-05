@@ -7,13 +7,15 @@ import { FileText, Users, Fish } from 'lucide-react';
 export function Reports() {
   const { trips, clients, reports } = useApp();
 
+  const today = new Date().toISOString().split('T')[0];
+
   const completedTrips = trips
-    .filter(t => t.status === 'completed')
+    .filter(t => t.date < today)
     .sort((a, b) => b.date.localeCompare(a.date));
 
   const totalClients = clients.length;
-  const totalTrips = trips.filter(t => t.status === 'completed').length;
-  const upcomingCount = trips.filter(t => t.status === 'upcoming').length;
+  const totalTrips = completedTrips.length;
+  const upcomingCount = trips.filter(t => t.date >= today).length;
 
   return (
     <Layout>
@@ -50,7 +52,7 @@ export function Reports() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-semibold text-slate-800">{formatDate(trip.date)}</p>
-                        <p className="text-xs text-slate-400">{trip.location} · {trip.duration === 'full' ? 'Full Day' : 'Half Day'}</p>
+                        <p className="text-xs text-slate-400">{trip.duration === 'full' ? 'Full Day' : 'Half Day'}</p>
                       </div>
                       <span className="text-xs bg-sage-100 text-sage-700 px-2 py-0.5 rounded-full font-medium">Completed</span>
                     </div>
