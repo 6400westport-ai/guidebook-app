@@ -19,7 +19,6 @@ export function EditTripModal({ trip, onClose }: Props) {
   });
   const [selectedClients, setSelectedClients] = useState<TripClient[]>(trip.clients);
   const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState<{ location?: string }>({});
   const [clientSearch, setClientSearch] = useState('');
   const [showNewClient, setShowNewClient] = useState(false);
   const [newClientForm, setNewClientForm] = useState({ firstName: '', lastName: '', phone: '', email: '' });
@@ -67,13 +66,8 @@ export function EditTripModal({ trip, onClose }: Props) {
   };
 
   const handleSave = async () => {
-    if (!form.location.trim()) {
-      setErrors({ location: 'Please enter a location' });
-      return;
-    }
-    setErrors({});
     setSaving(true);
-    await updateTripFull(trip.id, { ...form, clients: selectedClients });
+    await updateTripFull(trip.id, { ...form, location: '', clients: selectedClients });
     onClose();
   };
 
@@ -114,15 +108,6 @@ export function EditTripModal({ trip, onClose }: Props) {
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="text-xs font-medium text-slate-500 block mb-1">Where are clients staying?</label>
-            <input type="text" value={form.location} placeholder="e.g. Kiawah Island Resort"
-              onChange={e => { setForm(f => ({ ...f, location: e.target.value })); setErrors({}); }}
-              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-300 ${errors.location ? 'border-red-300 bg-red-50' : 'border-slate-200'}`} />
-            {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
           </div>
 
           {/* Clients */}
@@ -208,7 +193,7 @@ export function EditTripModal({ trip, onClose }: Props) {
           <div>
             <label className="text-xs font-medium text-slate-500 block mb-1">Notes</label>
             <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              rows={3} placeholder="Tides, target species, special instructions..."
+              rows={3} placeholder="Location, tides, target species, special instructions..."
               className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-300 resize-none" />
           </div>
         </div>

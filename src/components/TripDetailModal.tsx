@@ -47,10 +47,7 @@ export function TripDetailModal({ trip, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <div>
-            <h2 className="text-base font-semibold text-slate-800">{formatDate(trip.date)}</h2>
-            <p className="text-xs text-slate-400">{trip.location}</p>
-          </div>
+          <h2 className="text-base font-semibold text-slate-800">{formatDate(trip.date)}</h2>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowEdit(true)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Edit size={16} /></button>
             <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><X size={18} /></button>

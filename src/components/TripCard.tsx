@@ -1,6 +1,6 @@
 import type { Trip, Client } from '../types';
 import { formatDate } from '../lib/utils';
-import { Clock, MapPin, Fish, History, Pencil } from 'lucide-react';
+import { Clock, Fish, History, Pencil } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useApp } from '../context/AppContext';
 
@@ -119,14 +119,7 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
         </div>
       )}
 
-      {/* Location */}
-      {trip.location && (
-        <div className="flex items-center gap-1 text-xs text-slate-500">
-          <MapPin size={11} className="text-slate-400 flex-shrink-0" />{trip.location}
-        </div>
-      )}
-
-      {/* Guide notes */}
+      {/* Notes */}
       {trip.notes && (
         <p className="text-xs text-slate-500 leading-relaxed italic">{trip.notes}</p>
       )}

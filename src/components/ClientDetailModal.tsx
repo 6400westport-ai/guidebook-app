@@ -74,7 +74,6 @@ export function ClientDetailModal({ client, onClose }: Props) {
                         <p className="text-sm font-medium text-slate-700">{formatDate(trip.date)}</p>
                         <span className="text-xs text-slate-400">{trip.duration === 'full' ? 'Full' : 'Half'} Day</span>
                       </div>
-                      <p className="text-xs text-slate-500">{trip.location}</p>
                       {report && (
                         <p className="text-xs text-slate-500 mt-1.5 flex items-start gap-1">
                           <FileText size={10} className="mt-0.5 flex-shrink-0 text-slate-400" />
