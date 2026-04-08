@@ -32,6 +32,12 @@ export function EditTripModal({ trip, onClose }: Props) {
       c.phone.includes(q) ||
       c.email.toLowerCase().includes(q)
     );
+  }).sort((a, b) => {
+    const aSelected = selectedClients.some(tc => tc.clientId === a.id);
+    const bSelected = selectedClients.some(tc => tc.clientId === b.id);
+    if (aSelected && !bSelected) return -1;
+    if (!aSelected && bSelected) return 1;
+    return 0;
   });
 
   const toggleClient = (clientId: string) => {
