@@ -61,7 +61,9 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
           {tripClients.length > 0 && (
             <p className={cn('text-slate-500 mt-0.5 truncate', compact ? 'text-xs' : 'text-xs')}>
               {tripClients.map(({ client: c, partySize }) =>
-                partySize > 1 ? `${c.firstName} ${c.lastName} (${partySize})` : `${c.firstName} ${c.lastName}`
+                partySize > 1
+                  ? `${c.firstName} ${c.lastName} (${partySize} people)`
+                  : `${c.firstName} ${c.lastName}`
               ).join(' · ')}
             </p>
           )}
@@ -115,7 +117,7 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
               </div>
               <span className="text-sm font-semibold text-slate-800">
                 {c.firstName} {c.lastName}
-                {partySize > 1 && <span className="text-xs font-normal text-slate-400 ml-1">+{partySize - 1}</span>}
+                {partySize > 1 && <span className="text-xs font-normal text-slate-400 ml-1">({partySize} people)</span>}
               </span>
             </div>
           ))}

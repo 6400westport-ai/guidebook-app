@@ -154,7 +154,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }).select().single();
 
     if (data && trip.clients.length > 0) {
-      await supabase.from('trip_clients').insert(
+      const { error: tcError } = await supabase.from('trip_clients').insert(
         trip.clients.map(tc => ({
           trip_id: data.id,
           client_id: tc.clientId,
@@ -162,6 +162,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           party_size: tc.partySize ?? 1,
         }))
       );
+      if (tcError) console.error('trip_clients insert error:', tcError.message);
     }
     await loadData();
   };
@@ -215,7 +216,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Replace all clients for this trip
     await supabase.from('trip_clients').delete().eq('trip_id', id);
     if (updates.clients.length > 0) {
-      await supabase.from('trip_clients').insert(
+      const { error: tcError } = await supabase.from('trip_clients').insert(
         updates.clients.map(tc => ({
           trip_id: id,
           client_id: tc.clientId,
@@ -223,6 +224,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           party_size: tc.partySize ?? 1,
         }))
       );
+      if (tcError) console.error('trip_clients insert error:', tcError.message);
     }
     await loadData();
   };
