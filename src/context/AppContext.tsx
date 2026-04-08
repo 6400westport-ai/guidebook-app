@@ -42,7 +42,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const [profileRes, clientsRes, tripsRes, reportsRes] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', user.id).single(),
       supabase.from('clients').select('*').eq('guide_id', user.id).order('created_at'),
-      supabase.from('trips').select('*, trip_clients(client_id, deposit_paid)').eq('guide_id', user.id).order('date'),
+      supabase.from('trips').select('*, trip_clients(client_id, deposit_paid, party_size)').eq('guide_id', user.id).order('date'),
       supabase.from('trip_reports').select('*'),
     ]);
 
