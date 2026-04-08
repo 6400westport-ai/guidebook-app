@@ -1,6 +1,6 @@
 import type { Trip, Client } from '../types';
 import { formatDate } from '../lib/utils';
-import { Clock, Fish, History, Pencil } from 'lucide-react';
+import { History, Pencil, CalendarDays } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useApp } from '../context/AppContext';
 
@@ -15,18 +15,31 @@ interface TripCardProps {
 
 const tripTypeLabel: Record<string, string> = { fly: 'Fly', spin: 'Spin', both: 'Fly & Spin' };
 
+function durationLabel(duration: string): string {
+  if (duration === 'full') return 'Full Day';
+  if (duration === 'half-am') return 'Half Day (AM)';
+  if (duration === 'half-pm') return 'Half Day (PM)';
+  return 'Half Day';
+}
+
 export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compact }: TripCardProps) {
   const { getTripsForClient } = useApp();
-  const tripClients = trip.clients.map(tc => clients.find(c => c.id === tc.clientId)).filter(Boolean) as Client[];
+  const tripClients = trip.clients.map(tc => ({
+    client: clients.find(c => c.id === tc.clientId),
+    depositPaid: tc.depositPaid,
+    partySize: tc.partySize ?? 1,
+  })).filter(tc => tc.client) as { client: Client; depositPaid: boolean; partySize: number }[];
 
   const allDepositsPaid = trip.clients.length > 0 && trip.clients.every(tc => tc.depositPaid);
   const anyDepositMissing = trip.clients.some(tc => !tc.depositPaid);
+  const isPast = trip.date < new Date().toISOString().split('T')[0];
 
-  // Check if any client has past completed trips
-  const clientsWithHistory = tripClients.filter(c => {
-    const pastTrips = getTripsForClient(c.id).filter(t => t.id !== trip.id && t.status === 'completed');
+  const clientsWithHistory = tripClients.filter(({ client: c }) => {
+    const pastTrips = getTripsForClient(c.id).filter(t => t.id !== trip.id && t.date < new Date().toISOString().split('T')[0]);
     return pastTrips.length > 0;
   });
+
+  const headline = `${tripTypeLabel[trip.tripType]} Trip · ${durationLabel(trip.duration)}`;
 
   return (
     <div
@@ -37,72 +50,61 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
         compact ? 'space-y-2' : 'space-y-3'
       )}
     >
-      {/* Date + duration + trip type + deposit status */}
+      {/* Headline row: trip type + duration + deposit badge + edit */}
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className={cn('font-semibold text-slate-800', compact ? 'text-xs' : 'text-sm')}>{formatDate(trip.date)}</p>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span className={cn(
-              'inline-flex items-center gap-1 font-semibold rounded-md px-1.5 py-0.5',
-              compact ? 'text-xs bg-slate-100 text-slate-600' : 'text-xs bg-brand-100 text-brand-700'
-            )}>
-              <Clock size={10} />
-              {trip.duration === 'full' ? 'Full Day' : 'Half Day'}
-            </span>
-            <span className={cn(
-              'inline-flex items-center gap-1 font-semibold rounded-md px-1.5 py-0.5',
-              compact ? 'text-xs bg-slate-100 text-slate-600' : 'text-xs bg-brand-100 text-brand-700'
-            )}>
-              <Fish size={10} />
-              {tripTypeLabel[trip.tripType]}
-            </span>
-            {trip.status === 'upcoming' ? (
-              allDepositsPaid ? (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
-                  Deposit Paid
-                </span>
-              ) : anyDepositMissing ? (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
-                  Deposit Needed
-                </span>
-              ) : null
-            ) : (
-              <span className={cn(
-                'text-xs font-medium px-2 py-0.5 rounded-full',
-                trip.status === 'completed' ? 'bg-sage-100 text-sage-700' : 'bg-red-50 text-red-600'
-              )}>
-                {trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}
-              </span>
-            )}
-          </div>
+        <div className="min-w-0">
+          <p className={cn('font-bold text-slate-800 leading-tight', compact ? 'text-xs' : 'text-sm')}>
+            {headline}
+          </p>
+
+          {/* Client names with party size */}
+          {tripClients.length > 0 && (
+            <p className={cn('text-slate-500 mt-0.5 truncate', compact ? 'text-xs' : 'text-xs')}>
+              {tripClients.map(({ client: c, partySize }) =>
+                partySize > 1 ? `${c.firstName} ${c.lastName} (${partySize})` : `${c.firstName} ${c.lastName}`
+              ).join(' · ')}
+            </p>
+          )}
         </div>
-        {onEdit && (
-          <button
-            onClick={e => { e.stopPropagation(); onEdit(); }}
-            className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"
-          >
-            <Pencil size={13} />
-          </button>
-        )}
+
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Deposit badge */}
+          {!isPast && (
+            allDepositsPaid && trip.clients.length > 0 ? (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                Deposit Paid
+              </span>
+            ) : anyDepositMissing ? (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                Deposit Needed
+              </span>
+            ) : null
+          )}
+          {onEdit && (
+            <button
+              onClick={e => { e.stopPropagation(); onEdit(); }}
+              className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <Pencil size={13} />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Clients */}
-      {tripClients.length > 0 && (
+      {/* Client avatars */}
+      {!compact && tripClients.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
-          {tripClients.map(c => (
+          {tripClients.map(({ client: c, partySize }) => (
             <div
               key={c.id}
               onClick={onClientClick ? (e) => { e.stopPropagation(); onClientClick(c); } : undefined}
               className={cn(
                 'flex items-center gap-2 rounded-full pl-1 pr-3 py-1',
-                compact ? 'bg-slate-100' : 'bg-brand-50 border border-brand-100',
+                'bg-brand-50 border border-brand-100',
                 onClientClick && 'cursor-pointer hover:bg-brand-100 transition-colors'
               )}
             >
-              <div className={cn(
-                'rounded-full bg-brand-200 overflow-hidden flex-shrink-0',
-                compact ? 'w-8 h-8' : 'w-10 h-10'
-              )}>
+              <div className="w-8 h-8 rounded-full bg-brand-200 overflow-hidden flex-shrink-0">
                 {c.photoUrl ? (
                   <img src={c.photoUrl} alt={c.firstName} className="w-full h-full object-cover" />
                 ) : (
@@ -111,13 +113,20 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
                   </div>
                 )}
               </div>
-              <span className={cn('font-semibold text-slate-800', compact ? 'text-xs' : 'text-sm')}>
+              <span className="text-sm font-semibold text-slate-800">
                 {c.firstName} {c.lastName}
+                {partySize > 1 && <span className="text-xs font-normal text-slate-400 ml-1">+{partySize - 1}</span>}
               </span>
             </div>
           ))}
         </div>
       )}
+
+      {/* Date */}
+      <div className="flex items-center gap-1.5 text-xs text-slate-400">
+        <CalendarDays size={11} />
+        {formatDate(trip.date)}
+      </div>
 
       {/* Notes */}
       {trip.notes && (
@@ -127,8 +136,8 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
       {/* Past trips link */}
       {!compact && clientsWithHistory.length > 0 && onClientClick && (
         <div className="border-t border-slate-100 pt-2 flex flex-wrap gap-2">
-          {clientsWithHistory.map(c => {
-            const pastCount = getTripsForClient(c.id).filter(t => t.id !== trip.id && t.status === 'completed').length;
+          {clientsWithHistory.map(({ client: c }) => {
+            const pastCount = getTripsForClient(c.id).filter(t => t.id !== trip.id && t.date < new Date().toISOString().split('T')[0]).length;
             return (
               <button
                 key={c.id}

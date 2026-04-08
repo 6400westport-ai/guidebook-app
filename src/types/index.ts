@@ -26,11 +26,12 @@ export interface Client {
 }
 
 export type TripType = 'fly' | 'spin' | 'both';
-export type TripDuration = 'full' | 'half';
+export type TripDuration = 'full' | 'half-am' | 'half-pm' | 'half'; // 'half' kept for legacy records
 
 export interface TripClient {
   clientId: string;
   depositPaid: boolean;
+  partySize?: number; // total people including the client themselves
 }
 
 export interface Trip {

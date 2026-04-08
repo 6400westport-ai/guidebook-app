@@ -38,13 +38,19 @@ export function EditTripModal({ trip, onClose }: Props) {
     setSelectedClients(prev =>
       prev.some(tc => tc.clientId === clientId)
         ? prev.filter(tc => tc.clientId !== clientId)
-        : [...prev, { clientId, depositPaid: false }]
+        : [...prev, { clientId, depositPaid: false, partySize: 1 }]
     );
   };
 
   const toggleDeposit = (clientId: string) => {
     setSelectedClients(prev =>
       prev.map(tc => tc.clientId === clientId ? { ...tc, depositPaid: !tc.depositPaid } : tc)
+    );
+  };
+
+  const setPartySize = (clientId: string, size: number) => {
+    setSelectedClients(prev =>
+      prev.map(tc => tc.clientId === clientId ? { ...tc, partySize: Math.max(1, size) } : tc)
     );
   };
 
@@ -92,7 +98,8 @@ export function EditTripModal({ trip, onClose }: Props) {
               <select value={form.duration} onChange={e => setForm(f => ({ ...f, duration: e.target.value as TripDuration }))}
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-300">
                 <option value="full">Full Day</option>
-                <option value="half">Half Day</option>
+                <option value="half-am">Half Day (AM)</option>
+                <option value="half-pm">Half Day (PM)</option>
               </select>
             </div>
           </div>
@@ -176,11 +183,20 @@ export function EditTripModal({ trip, onClose }: Props) {
                         <span className="text-sm text-slate-700">{client.firstName} {client.lastName}</span>
                       </label>
                       {selected && (
-                        <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer">
-                          <input type="checkbox" checked={selected.depositPaid} onChange={() => toggleDeposit(client.id)}
-                            className="rounded border-slate-300 text-green-500 focus:ring-green-300" />
-                          Deposit paid
-                        </label>
+                        <div className="flex items-center gap-2">
+                          <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer">
+                            <input type="checkbox" checked={selected.depositPaid} onChange={() => toggleDeposit(client.id)}
+                              className="rounded border-slate-300 text-green-500 focus:ring-green-300" />
+                            Deposit
+                          </label>
+                          <div className="flex items-center gap-1">
+                            <button type="button" onClick={() => setPartySize(client.id, (selected.partySize ?? 1) - 1)}
+                              className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold flex items-center justify-center">−</button>
+                            <span className="text-xs text-slate-700 w-4 text-center">{selected.partySize ?? 1}</span>
+                            <button type="button" onClick={() => setPartySize(client.id, (selected.partySize ?? 1) + 1)}
+                              className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold flex items-center justify-center">+</button>
+                          </div>
+                        </div>
                       )}
                     </div>
                   );

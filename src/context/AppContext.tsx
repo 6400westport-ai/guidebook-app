@@ -87,9 +87,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         location: t.location ?? '',
         notes: t.notes ?? '',
         status: t.status,
-        clients: (t.trip_clients ?? []).map((tc: { client_id: string; deposit_paid: boolean }) => ({
+        clients: (t.trip_clients ?? []).map((tc: { client_id: string; deposit_paid: boolean; party_size?: number }) => ({
           clientId: tc.client_id,
           depositPaid: tc.deposit_paid,
+          partySize: tc.party_size ?? 1,
         })),
       })));
     }
@@ -158,6 +159,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           trip_id: data.id,
           client_id: tc.clientId,
           deposit_paid: tc.depositPaid,
+          party_size: tc.partySize ?? 1,
         }))
       );
     }
@@ -217,6 +219,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           trip_id: id,
           client_id: tc.clientId,
           deposit_paid: tc.depositPaid,
+          party_size: tc.partySize ?? 1,
         }))
       );
     }
