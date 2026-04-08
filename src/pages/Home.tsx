@@ -42,7 +42,7 @@ export function Home() {
           <section>
             <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Today's Trip</h2>
             {todayTrip ? (
-              <TripCard trip={todayTrip} clients={clients} onClientClick={setSelectedClient} onEdit={() => setEditingTrip(todayTrip)} />
+              <TripCard trip={todayTrip} clients={clients} onClientClick={setSelectedClient} onEdit={() => setEditingTrip(todayTrip)} featured />
             ) : (
               <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm">
                 No trip scheduled today — enjoy the day off.
@@ -55,7 +55,7 @@ export function Home() {
             {weekTrips.length > 0 ? (
               <div className="space-y-3">
                 {weekTrips.map(trip => (
-                  <TripCard key={trip.id} trip={trip} clients={clients} compact onClientClick={setSelectedClient} onEdit={() => setEditingTrip(trip)} />
+                  <TripCard key={trip.id} trip={trip} clients={clients} onClientClick={setSelectedClient} onEdit={() => setEditingTrip(trip)} />
                 ))}
               </div>
             ) : (

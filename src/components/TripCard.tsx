@@ -11,6 +11,7 @@ interface TripCardProps {
   onClientClick?: (client: Client) => void;
   onEdit?: () => void;
   compact?: boolean;
+  featured?: boolean;
 }
 
 const tripTypeLabel: Record<string, string> = { fly: 'Fly', spin: 'Spin', both: 'Fly & Spin' };
@@ -22,7 +23,7 @@ function durationLabel(duration: string): string {
   return 'Half Day';
 }
 
-export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compact }: TripCardProps) {
+export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compact, featured }: TripCardProps) {
   const { getTripsForClient } = useApp();
   const tripClients = trip.clients.map(tc => ({
     client: clients.find(c => c.id === tc.clientId),
@@ -45,15 +46,19 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
     <div
       onClick={onClick}
       className={cn(
-        'bg-white rounded-xl border border-slate-200 p-4 transition-all',
-        onClick && 'cursor-pointer hover:shadow-md hover:border-brand-200',
+        'rounded-xl border p-4 transition-all',
+        featured
+          ? 'bg-gradient-to-br from-brand-50 to-white border-brand-200 shadow-md space-y-3'
+          : 'bg-white border-slate-200',
+        !featured && onClick && 'cursor-pointer hover:shadow-md hover:border-brand-200',
+        featured && onClick && 'cursor-pointer',
         compact ? 'space-y-2' : 'space-y-3'
       )}
     >
       {/* Headline row: trip type + duration + deposit badge + edit */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className={cn('font-bold text-slate-800 leading-tight', compact ? 'text-xs' : 'text-sm')}>
+          <p className={cn('font-bold text-slate-800 leading-tight', compact ? 'text-xs' : featured ? 'text-base' : 'text-sm')}>
             {headline}
           </p>
 
