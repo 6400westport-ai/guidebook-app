@@ -57,14 +57,21 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
             {headline}
           </p>
 
-          {/* Client names with party size */}
-          {tripClients.length > 0 && (
-            <p className={cn('text-slate-500 mt-0.5 truncate', compact ? 'text-xs' : 'text-xs')}>
-              {tripClients.map(({ client: c, partySize }) =>
-                partySize > 1
-                  ? `${c.firstName} ${c.lastName} (${partySize} people)`
-                  : `${c.firstName} ${c.lastName}`
-              ).join(' · ')}
+          {/* Under headline: date for full cards, client names for compact */}
+          {compact ? (
+            tripClients.length > 0 && (
+              <p className="text-xs text-slate-500 mt-0.5 truncate">
+                {tripClients.map(({ client: c, partySize }) =>
+                  partySize > 1
+                    ? `${c.firstName} ${c.lastName} (${partySize} people)`
+                    : `${c.firstName} ${c.lastName}`
+                ).join(' · ')}
+              </p>
+            )
+          ) : (
+            <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+              <CalendarDays size={11} />
+              {formatDate(trip.date)}
             </p>
           )}
         </div>
@@ -124,11 +131,13 @@ export function TripCard({ trip, clients, onClick, onClientClick, onEdit, compac
         </div>
       )}
 
-      {/* Date */}
-      <div className="flex items-center gap-1.5 text-xs text-slate-400">
-        <CalendarDays size={11} />
-        {formatDate(trip.date)}
-      </div>
+      {/* Date — compact only (full cards show date under headline) */}
+      {compact && (
+        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <CalendarDays size={11} />
+          {formatDate(trip.date)}
+        </div>
+      )}
 
       {/* Notes */}
       {trip.notes && (
