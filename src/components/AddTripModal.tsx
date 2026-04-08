@@ -224,7 +224,7 @@ export function AddTripModal({ defaultDate, onClose }: Props) {
           <div>
             <label className="text-xs font-medium text-slate-500 block mb-1">Notes</label>
             <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              rows={3} placeholder="Location, tides, target species, special instructions..."
+              rows={3} placeholder="Where client is staying and any special instructions..."
               className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-300 resize-none" />
           </div>
         </div>
