@@ -5,6 +5,7 @@ import type { Trip } from '../types';
 import { formatDate } from '../lib/utils';
 import { cn } from '../lib/utils';
 import { EditTripModal } from './EditTripModal';
+import { TripReportModal } from './TripReportModal';
 
 interface Props {
   trip: Trip;
@@ -14,26 +15,19 @@ interface Props {
 const tripTypeLabel: Record<string, string> = { fly: 'Fly', spin: 'Spin', both: 'Fly & Spin' };
 
 export function TripDetailModal({ trip, onClose }: Props) {
-  const { clients, reports, saveReport, deleteTrip } = useApp();
+  const { clients, reports, deleteTrip } = useApp();
   const tripClients = trip.clients.map(tc => ({
     client: clients.find(c => c.id === tc.clientId),
     depositPaid: tc.depositPaid,
   }));
   const existingReport = reports.find(r => r.tripId === trip.id);
-  const [reportNotes, setReportNotes] = useState(existingReport?.notes ?? '');
-  const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   // Treat any trip in the past as completed regardless of stored status
   const isPast = trip.date < new Date().toISOString().split('T')[0];
-
-  const handleSaveReport = async () => {
-    setSaving(true);
-    await saveReport(trip.id, reportNotes, existingReport?.id);
-    onClose();
-  };
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -104,23 +98,15 @@ export function TripDetailModal({ trip, onClose }: Props) {
 
           {/* Trip report — shown for past trips */}
           {isPast && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1.5">
-                <FileText size={11} />Trip Report
-              </p>
-              <textarea
-                value={reportNotes}
-                onChange={e => setReportNotes(e.target.value)}
-                rows={5}
-                placeholder="Write your trip report — conditions, catches, highlights..."
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-300 resize-none"
-              />
-              <button onClick={handleSaveReport} disabled={saving}
-                className="mt-2 w-full py-2.5 text-sm bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-lg font-medium transition-colors">
-                {saving ? 'Saving...' : 'Save Report'}
-              </button>
-            </div>
+            <button
+              onClick={() => setShowReport(true)}
+              className="w-full py-2.5 text-sm bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <FileText size={15} />
+              {existingReport ? 'Edit Trip Report' : 'Log Trip Report'}
+            </button>
           )}
+          {showReport && <TripReportModal trip={trip} existingReport={existingReport} onClose={() => { setShowReport(false); onClose(); }} />}
 
           {/* Delete */}
           {!confirmDelete ? (

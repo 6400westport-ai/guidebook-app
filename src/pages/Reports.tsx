@@ -1,11 +1,15 @@
+import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Layout } from '../components/layout/Layout';
 import { Header } from '../components/layout/Header';
+import { TripReportModal } from '../components/TripReportModal';
 import { formatDate } from '../lib/utils';
-import { FileText, Users, Fish } from 'lucide-react';
+import { FileText, Users, Fish, Pencil, PlusCircle } from 'lucide-react';
+import type { Trip } from '../types';
 
 export function Reports() {
   const { trips, clients, reports } = useApp();
+  const [reportingTrip, setReportingTrip] = useState<Trip | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -54,7 +58,26 @@ export function Reports() {
                         <p className="text-sm font-semibold text-slate-800">{formatDate(trip.date)}</p>
                         <p className="text-xs text-slate-400">{trip.duration === 'full' ? 'Full Day' : 'Half Day'}</p>
                       </div>
-                      <span className="text-xs bg-sage-100 text-sage-700 px-2 py-0.5 rounded-full font-medium">Completed</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs bg-sage-100 text-sage-700 px-2 py-0.5 rounded-full font-medium">Completed</span>
+                        {report ? (
+                          <button
+                            onClick={() => setReportingTrip(trip)}
+                            className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 transition-colors font-medium"
+                          >
+                            <Pencil size={12} />
+                            Edit Report
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setReportingTrip(trip)}
+                            className="flex items-center gap-1 text-xs bg-brand-500 hover:bg-brand-600 text-white px-2 py-1 rounded-lg transition-colors font-medium"
+                          >
+                            <PlusCircle size={12} />
+                            Log Trip
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex gap-1.5 flex-wrap">
                       {tripClients.map(c => c && (
@@ -63,6 +86,18 @@ export function Reports() {
                         </span>
                       ))}
                     </div>
+                    {report && report.photoUrls.length > 0 && (
+                      <div className="flex gap-1.5 flex-wrap pt-1">
+                        {report.photoUrls.slice(0, 4).map((url, i) => (
+                          <img
+                            key={i}
+                            src={url}
+                            alt={`Trip photo ${i + 1}`}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                        ))}
+                      </div>
+                    )}
                     {report ? (
                       <p className="text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-2">{report.notes}</p>
                     ) : (
@@ -75,6 +110,14 @@ export function Reports() {
           </div>
         </div>
       </div>
+
+      {reportingTrip && (
+        <TripReportModal
+          trip={reportingTrip}
+          existingReport={reports.find(r => r.tripId === reportingTrip.id)}
+          onClose={() => setReportingTrip(null)}
+        />
+      )}
     </Layout>
   );
 }

@@ -17,7 +17,7 @@ interface AppContextType {
   updateClient: (id: string, updates: Partial<Client>) => Promise<void>;
   addTrip: (trip: { date: string; duration: string; tripType: string; location: string; notes: string; clients: TripClient[] }) => Promise<void>;
   updateTrip: (id: string, updates: Partial<Trip>) => Promise<void>;
-  saveReport: (tripId: string, notes: string, existingReportId?: string) => Promise<void>;
+  saveReport: (tripId: string, notes: string, photoUrls: string[], existingReportId?: string) => Promise<void>;
   updateProfile: (updates: Partial<Guide>) => Promise<void>;
   updatePhotoUrl: (field: 'photoUrl' | 'logoUrl', url: string) => Promise<void>;
   deleteTrip: (id: string) => Promise<void>;
@@ -174,11 +174,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await loadData();
   };
 
-  const saveReport = async (tripId: string, notes: string, existingReportId?: string) => {
+  const saveReport = async (tripId: string, notes: string, photoUrls: string[], existingReportId?: string) => {
     if (existingReportId) {
-      await supabase.from('trip_reports').update({ notes }).eq('id', existingReportId);
+      await supabase.from('trip_reports').update({ notes, photo_urls: photoUrls }).eq('id', existingReportId);
     } else {
-      await supabase.from('trip_reports').insert({ trip_id: tripId, notes });
+      await supabase.from('trip_reports').insert({ trip_id: tripId, notes, photo_urls: photoUrls });
       await supabase.from('trips').update({ status: 'completed' }).eq('id', tripId);
     }
     await loadData();
