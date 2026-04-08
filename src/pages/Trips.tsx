@@ -4,7 +4,7 @@ import { Layout } from '../components/layout/Layout';
 import { Header } from '../components/layout/Header';
 import { TripCard } from '../components/TripCard';
 import { ClientDetailModal } from '../components/ClientDetailModal';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CalendarPlus } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { Trip, Client } from '../types';
 import { AddTripModal } from '../components/AddTripModal';
@@ -59,7 +59,8 @@ export function Trips() {
         </button>
 
         <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-4">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-1">
             <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600"><ChevronLeft size={18} /></button>
             <h2 className="text-base font-semibold text-slate-800">
               {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
@@ -67,13 +68,21 @@ export function Trips() {
             <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600"><ChevronRight size={18} /></button>
           </div>
 
-          <div className="grid grid-cols-7 mb-2">
+          {/* Hint */}
+          <p className="text-center text-xs text-slate-400 mb-4 flex items-center justify-center gap-1">
+            <CalendarPlus size={11} />
+            Click any day to schedule a new trip
+          </p>
+
+          {/* Day labels */}
+          <div className="grid grid-cols-7 mb-1">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} className="text-center text-xs font-medium text-slate-400 py-1">{d}</div>
+              <div key={d} className="text-center text-xs font-semibold text-slate-400 py-1 uppercase tracking-wide">{d}</div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-1">
+          {/* Grid */}
+          <div className="grid grid-cols-7 gap-1.5">
             {Array.from({ length: firstDay }).map((_, i) => (
               <div key={`empty-${i}`} />
             ))}
@@ -82,29 +91,44 @@ export function Trips() {
               const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
               const dayTrips = getTripsForDay(day);
               const isToday = dateStr === todayStr;
+              const isPast = dateStr < todayStr;
 
               return (
                 <div
                   key={day}
                   onClick={() => handleDayClick(day)}
                   className={cn(
-                    'relative min-h-[70px] p-1 rounded-lg cursor-pointer transition-colors',
-                    isToday ? 'bg-brand-50 border border-brand-200' : 'hover:bg-slate-50',
+                    'relative min-h-[84px] p-1.5 rounded-xl cursor-pointer transition-all group',
+                    isToday
+                      ? 'bg-brand-50 border-2 border-brand-300 shadow-sm'
+                      : isPast && dayTrips.length > 0
+                        ? 'bg-slate-50 border border-slate-200 hover:border-slate-300'
+                        : 'border border-transparent hover:bg-slate-50 hover:border-slate-200',
                   )}
                 >
-                  <span className={cn(
-                    'text-xs font-medium block mb-1 text-center',
-                    isToday ? 'text-brand-700' : 'text-slate-600'
-                  )}>{day}</span>
+                  {/* Day number */}
+                  <div className="flex justify-center mb-1.5">
+                    <span className={cn(
+                      'text-xs font-semibold w-5 h-5 flex items-center justify-center rounded-full',
+                      isToday
+                        ? 'bg-brand-500 text-white'
+                        : isPast
+                          ? 'text-slate-400'
+                          : 'text-slate-700 group-hover:text-brand-600'
+                    )}>{day}</span>
+                  </div>
+
+                  {/* Trip blocks */}
                   <div className="space-y-1">
                     {dayTrips.slice(0, 2).map(trip => {
                       const tripClients = trip.clients
                         .map(tc => clients.find(c => c.id === tc.clientId))
                         .filter(Boolean) as typeof clients;
+                      const past = trip.date < todayStr;
                       return (
                         <div key={trip.id} className={cn(
-                          'rounded px-1 py-0.5',
-                          trip.status === 'completed' ? 'bg-sage-100' : 'bg-brand-100'
+                          'rounded-lg px-1.5 py-1',
+                          past ? 'bg-sage-100 border border-sage-200' : 'bg-brand-100 border border-brand-200'
                         )}>
                           {/* Client photos */}
                           {tripClients.some(c => c.photoUrl) && (
@@ -113,7 +137,7 @@ export function Trips() {
                                 <div
                                   key={c.id}
                                   onClick={e => { e.stopPropagation(); setSelectedClient(c); }}
-                                  className="w-4 h-4 rounded-full overflow-hidden flex-shrink-0 cursor-pointer ring-1 ring-white"
+                                  className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 cursor-pointer ring-1 ring-white shadow-sm"
                                 >
                                   <img src={c.photoUrl!} alt={c.firstName} className="w-full h-full object-cover" />
                                 </div>
@@ -126,8 +150,8 @@ export function Trips() {
                               key={c.id}
                               onClick={e => { e.stopPropagation(); setSelectedClient(c); }}
                               className={cn(
-                                'text-xs truncate cursor-pointer hover:underline leading-tight',
-                                trip.status === 'completed' ? 'text-sage-700' : 'text-brand-700'
+                                'text-xs truncate cursor-pointer hover:underline leading-tight font-medium',
+                                past ? 'text-sage-700' : 'text-brand-700'
                               )}
                             >
                               {c.firstName}
@@ -137,7 +161,7 @@ export function Trips() {
                       );
                     })}
                     {dayTrips.length > 2 && (
-                      <div className="text-xs text-slate-400 text-center">+{dayTrips.length - 2}</div>
+                      <div className="text-xs text-slate-400 text-center font-medium">+{dayTrips.length - 2} more</div>
                     )}
                   </div>
                 </div>
