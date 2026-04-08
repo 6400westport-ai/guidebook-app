@@ -204,13 +204,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateTripFull = async (id: string, updates: { date: string; duration: string; tripType: string; location: string; notes: string; clients: TripClient[] }) => {
-    await supabase.from('trips').update({
+    const { error } = await supabase.from('trips').update({
       date: updates.date,
       duration: updates.duration,
       trip_type: updates.tripType,
       location: updates.location,
       notes: updates.notes,
     }).eq('id', id);
+    if (error) { console.error('updateTripFull error:', error.message); return; }
     // Replace all clients for this trip
     await supabase.from('trip_clients').delete().eq('trip_id', id);
     if (updates.clients.length > 0) {
